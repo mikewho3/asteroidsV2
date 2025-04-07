@@ -4,8 +4,11 @@
 import pygame
 
 # Is the game active and the player is playing?
-running = True
-paused = False
+running = True # This variable is used to control the main game loop and all other game loops
+paused = False # Is the game active but paused? This variable is used to control the pause screen and the game loop
+main_menu = True # Is the game in the main menu? This variable is used to control the main menu loop
+playing = False # Is the game active and the player is playing? This variable is used to control the active game loop
+
 
 
 # Define the ship here.  This will be changed when the player creates a ship and starts a game mode

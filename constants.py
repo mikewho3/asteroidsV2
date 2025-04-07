@@ -70,6 +70,7 @@ SHOT_COLOR = [155,0,155]
 STATUSBAR_COLOR = [255,255,255]
 CONTROLBAR_COLOR = [255,255,255]
 PAUSED_COLOR = [255,255,0]
+TITLE_COLOR = [255,255,255]
 
 # Shot Constants
 # These constants are used to define the properties of shots in the game

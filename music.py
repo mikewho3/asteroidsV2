@@ -13,3 +13,7 @@ def load_music(file="asteroids.mp3",volume=0.5,play_time=-1):
 
     # Play the music for the specified time (in seconds)
     pygame.mixer.music.play(play_time)  
+
+def stop_music():
+    # Stop the music
+    pygame.mixer.music.stop()

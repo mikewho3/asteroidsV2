@@ -23,7 +23,7 @@ class Player(circleshape.CircleShape):
         self.shot_timer = 0
         self.shot_timer_bypass = 0
         # Player Ship Death Timer (locks controls while dead)
-        self.dead_timer = 1.2
+        self.dead_timer = 0
         # Player Ship Starting Lives
         self.lives = constants.PLAYER_STARTING_LIVES
         # Player Spinning Attack Variables
