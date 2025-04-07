@@ -14,12 +14,12 @@ import gamestate
 import player
 import asteroidfield
 import constants
-import soundeffects
 import asteroids
 import bullets
 import statusbars
 import shipdeath
 import highscore
+import pausescreen
 
 def main():
     # Initialize Pygame
@@ -51,6 +51,12 @@ def main():
                 print("Game Over!")
                 print(f"Game Score: {gamestate.score}")
                 return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE: #if the escape key is pressed
+                    if gamestate.ship.dead_timer > 0: #if the ship is dead, don't do anything
+                        pass
+                    else:
+                        gamestate.paused = not gamestate.paused  # Pause/Unpause the game if the escape key is pressed
         # Fill the screen with the background color
         gamestate.screen.fill(constants.SCREEN_COLOR)
         # Initialize the high score list if it is None
@@ -65,18 +71,24 @@ def main():
         if gamestate.asteroid_field is None:
             gamestate.asteroid_field = asteroidfield.AsteroidField()
         # Don't let the ship go off the screen
-        if gamestate.ship.position.x < 0:
-            gamestate.ship.position.x = constants.SCREEN_WIDTH
-        if gamestate.ship.position.x > constants.SCREEN_WIDTH:
-            gamestate.ship.position.x = 0
-        if gamestate.ship.position.y < 0:
-            gamestate.ship.position.y = constants.SCREEN_HEIGHT
-        if gamestate.ship.position.y > constants.SCREEN_HEIGHT:
-            gamestate.ship.position.y = 0
+        if not gamestate.paused:
+            if gamestate.ship.position.x < 0:
+                gamestate.ship.position.x = constants.SCREEN_WIDTH
+            if gamestate.ship.position.x > constants.SCREEN_WIDTH:
+                gamestate.ship.position.x = 0
+            if gamestate.ship.position.y < 0:
+                gamestate.ship.position.y = constants.SCREEN_HEIGHT
+            if gamestate.ship.position.y > constants.SCREEN_HEIGHT:
+                gamestate.ship.position.y = 0
         # Update the game state
-        for x in constants.UPDATEABLE_GROUP:
-            x.update(gamestate.dt)
-            #print(f"Debug: {x} updated")
+        if not gamestate.paused: #if the game is not paused, update the game state
+            for x in constants.UPDATEABLE_GROUP:
+                x.update(gamestate.dt)
+        else:
+            # If the game is paused, stop updating the game state
+            # Display the pause screen
+            pausescreen.pause_screen()
+
         for x in constants.DRAWABLE_GROUP:
             if isinstance(x, asteroids.Asteroid):
                 #print(f"Debug: drawablegroup: draw asteroid")

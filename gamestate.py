@@ -5,6 +5,7 @@ import pygame
 
 # Is the game active and the player is playing?
 running = True
+paused = False
 
 
 # Define the ship here.  This will be changed when the player creates a ship and starts a game mode

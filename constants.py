@@ -27,8 +27,8 @@ BULLET_CONTAINERS = (UPDATEABLE_GROUP,DRAWABLE_GROUP,BULLET_GROUP)
 # These constants are used to define the dimensions of the game screen
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
-SCREEN_HALF_WIDTH = SCREEN_WIDTH / 2
-SCREEN_HALF_HEIGHT = SCREEN_HEIGHT /2
+SCREEN_HALF_WIDTH = SCREEN_WIDTH // 2
+SCREEN_HALF_HEIGHT = SCREEN_HEIGHT //2 - 50
 
 # Asteroid constants
 # These constants are used to define the properties of asteroids in the game
@@ -69,6 +69,7 @@ SCREEN_COLOR = [0,0,0]
 SHOT_COLOR = [155,0,155]
 STATUSBAR_COLOR = [255,255,255]
 CONTROLBAR_COLOR = [255,255,255]
+PAUSED_COLOR = [255,255,0]
 
 # Shot Constants
 # These constants are used to define the properties of shots in the game
