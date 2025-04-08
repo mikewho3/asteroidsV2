@@ -97,6 +97,25 @@ def main():
                             pass
                         else:
                             gamestate.paused = not gamestate.paused  # Pause/Unpause the game if the escape key is pressed
+                    if event.key == pygame.K_q and gamestate.paused == True:
+                        music.stop_music() # stop the music
+                        for big_space_rock in constants.UPDATEABLE_GROUP: #reset the asteroids
+                            if isinstance(big_space_rock, asteroids.Asteroid):
+                                big_space_rock.kill()
+                        for asfield in constants.UPDATEABLE_GROUP: #reset the asteroid field
+                            if isinstance(asfield, asteroidfield.AsteroidField):
+                                asfield.kill()
+                        for bullet in constants.UPDATEABLE_GROUP: #reset the asteroid field
+                            if isinstance(bullet, bullets.Shot):
+                                bullet.kill()
+                        gamestate.asteroid_field = None #reset the asteroid field
+                        gamestate.ship.reset()
+                        gamestate.score = 0 #reset the score
+                        gamestate.ship.lives = constants.PLAYER_STARTING_LIVES #reset the ship lives
+                        gamestate.main_menu = True # if the game is paused and the Q key is pressed, go to the main menu
+                        gamestate.playing = False # set the playing variable to False to exit the game loop
+                        gamestate.paused = False # reset the paused variable to false before we exit the loop
+                        break # exit the game loop NOW
             if gamestate.screen is None: #if the screen is None, create the screen
                 gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
             # Fill the screen with the background color
@@ -185,6 +204,9 @@ def main():
                         for asfield in constants.UPDATEABLE_GROUP: #reset the asteroid field
                             if isinstance(asfield, asteroidfield.AsteroidField):
                                 asfield.kill()
+                        for bullet in constants.UPDATEABLE_GROUP: #reset the asteroid field
+                            if isinstance(bullet, bullets.Shot):
+                                bullet.kill()
                         gamestate.asteroid_field = None #reset the asteroid field
                         gamestate.ship.reset()
                         gamestate.score = 0 #reset the score

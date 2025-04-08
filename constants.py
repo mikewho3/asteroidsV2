@@ -4,7 +4,7 @@ import pygame
 # Constant values are defined here
 
 # Game Version
-VERSION = 2.10
+VERSION = 2.15
 # Set Fonts
 pygame.font.init()
 title_font = pygame.font.Font(None, 150)
