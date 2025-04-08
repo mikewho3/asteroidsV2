@@ -10,7 +10,12 @@ pygame.font.init()
 title_font = pygame.font.Font(None, 150)
 title_font.set_bold(True)
 title_font.set_italic(True)
+header_score_font = pygame.font.Font(None, 100)
+header_score_font.set_bold(True)
 big_font = pygame.font.Font(None, 48)
+paused_font = pygame.font.Font(None, 72)
+paused_font.set_bold(True)
+paused_font.set_underline(True)
 font = pygame.font.Font(None, 19)
 medium_font = pygame.font.Font(None,18)
 small_font = pygame.font.Font(None, 16)
@@ -74,6 +79,7 @@ STATUSBAR_COLOR = [255,255,255]
 CONTROLBAR_COLOR = [255,255,255]
 PAUSED_COLOR = [255,255,0]
 TITLE_COLOR = [0,63,255]
+HIGH_SCORE_COLOR = [255,219,81]
 
 # Shot Constants
 # These constants are used to define the properties of shots in the game

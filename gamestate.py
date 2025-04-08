@@ -8,7 +8,7 @@ running = True # This variable is used to control the main game loop and all oth
 paused = False # Is the game active but paused? This variable is used to control the pause screen and the game loop
 main_menu = True # Is the game in the main menu? This variable is used to control the main menu loop
 playing = False # Is the game active and the player is playing? This variable is used to control the active game loop
-
+score_menu = False # Is the game in the high score menu? This variable is used to control the high score menu loop
 
 
 # Define the ship here.  This will be changed when the player creates a ship and starts a game mode

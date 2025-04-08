@@ -1,7 +1,7 @@
 # import required modules
 import pygame
 
-def load_music(file="asteroids.mp3",volume=0.5,play_time=-1):
+def load_music(file="asteroids.mp3",volume=0.5,play_time=-1,set_pos=None):
     # Initialize the mixer
     pygame.mixer.init()
 

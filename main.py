@@ -29,15 +29,22 @@ def main():
     gamestate.clock = pygame.time.Clock()
     # Start the Game
     print(f"Starting Asteroids Version {constants.VERSION}")
-    gamestate.high_scores = highscore.load_high_scores()
-    gamestate.high_scores = gamestate.high_scores[:10]  # Limit to top 10 scores
-    gamestate.top_player_name = gamestate.high_scores[0][0]
-    gamestate.top_player_score = gamestate.high_scores[0][1]
+    # Load the high scores
+    gamestate.high_scores = highscore.load_high_scores() # attempt to load the high scores from the file
+    if gamestate.high_scores: # if the high scores are not empty, limit the list to 10
+        gamestate.high_scores = gamestate.high_scores[:10]  # Limit to top 10 scores
+    gamestate.top_player_name, gamestate.top_player_score = highscore.get_top_player() # get the top player score and name (has a set default if the list is empty)
+    #gamestate.top_player_name = gamestate.high_scores[0][0]
+    #gamestate.top_player_score = gamestate.high_scores[0][1]
+
+    # Begin the MAIN loop.  This loop runs EVERYTHING, the game and all menus.  Each is it's own seperate loop
     while gamestate.running:
-        # Start the game music
-        if pygame.mixer.music.get_busy() == 0: #if the music is not playing, play the music
-            music.load_music(file="title.mp3", volume=0.5, play_time=-1)
+
+        # Here is the main menu loop.  This loop will run when gamestate.main_menu is True and will display the title screen and handle all functionality of the title screen
         while gamestate.main_menu:
+            # Start the game music
+            if pygame.mixer.music.get_busy() == 0: #if the music is not playing, play the music
+                music.load_music(file="title.mp3", volume=0.5, play_time=-1)
             if gamestate.screen is None: #if the screen is None, create the screen
                 gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
             gamestate.screen.fill(constants.SCREEN_COLOR) #fill the screen with the background color
@@ -50,8 +57,29 @@ def main():
                         music.stop_music() #stop the music
                         gamestate.playing = True #set the running variable to True to start the game
                         gamestate.main_menu = False
+                    if event.key == pygame.K_h:
+                        music.stop_music() #stop the music
+                        gamestate.score_menu = True #set the score menu variable to True to start the high score menu
+                        gamestate.main_menu = False
             titlescreen.title_screen() #display the title screen
             pygame.display.flip() #update the display
+
+        # Here is the high score menu loop.  This loop will run when gamestate.score_menu is True and will display the top 10 high scores from gamestate.high_scores using the highscore module with highscore.display_high_scores()
+        while gamestate.score_menu:
+            if pygame.mixer.music.get_busy() == 0: #if the music is not playing, play the music
+                music.load_music(file="score.mp3", volume=0.5, play_time=-1, set_pos=1)
+            if gamestate.screen is None:  # if the screen is None, create the screen
+                gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+            gamestate.screen.fill(constants.SCREEN_COLOR)  # fill the screen with the background color
+            highscore.display_high_scores(gamestate.screen, constants.font)  # display the high scores
+            pygame.display.flip()  # update the display
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()  # if the game window is closed, exit the game
+                if event.type == pygame.KEYDOWN:
+                    music.stop_music()  # stop the music
+                    gamestate.main_menu = True  # set the main menu variable to True to start the main menu loop
+                    gamestate.score_menu = False  # exit the high score menu
 
         # Begin the main game loop (active game loop)
         while gamestate.playing:
@@ -137,19 +165,20 @@ def main():
 
                 # This is where we check for collisions between the ship and asteroids
                 if space_rock.collision(gamestate.ship):
-                    if gamestate.ship.invincible_timer > 0: #if the ship is invincible, don't do anything
+                    if gamestate.ship.invincible_timer > 0: # if the ship is invincible, don't do anything
                         continue # skip the rest of the loop
-                    continue_game = shipdeath.check_ship_death()  #check if the ship is dead
+                    continue_game = shipdeath.check_ship_death()  # check if the ship is dead
                     if continue_game == True: # ship is dead but has lives left, continue the game
                         gamestate.ship.reset()  # reset the ship
                     else:
-                        if gamestate.score > gamestate.top_player_score: #if the score is greater than the top player score, save the high score
-                            name = highscore.get_player_name(gamestate.screen, constants.font) #get the player name
-                            highscore.save_high_score(name, gamestate.score) #save the high score
+                        
+                        highscore.update_high_scores(gamestate.score) # update the high scores
+                        gamestate.high_scores = highscore.load_high_scores()
+                        gamestate.high_scores = gamestate.high_scores[:10]  # Limit to top 10 scores
+                        gamestate.top_player_name, gamestate.top_player_score = highscore.get_top_player() # get the top player score and name (has a set default if the list is empty)
                         print("Game Over!")
                         print(f"Game Score: {gamestate.score}")
                         print(f"Current High Score: {gamestate.top_player_score} by {gamestate.top_player_name}")
-                        music.stop_music() #stop the music
                         for big_space_rock in constants.UPDATEABLE_GROUP: #reset the asteroids
                             if isinstance(big_space_rock, asteroids.Asteroid):
                                 big_space_rock.kill()
@@ -160,6 +189,7 @@ def main():
                         gamestate.ship.reset()
                         gamestate.score = 0 #reset the score
                         gamestate.ship.lives = constants.PLAYER_STARTING_LIVES #reset the ship lives
+                        music.stop_music() #stop the music
                         gamestate.playing = False
                         gamestate.main_menu = True
 
