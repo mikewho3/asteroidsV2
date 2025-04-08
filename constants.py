@@ -7,6 +7,9 @@ import pygame
 VERSION = 2.10
 # Set Fonts
 pygame.font.init()
+title_font = pygame.font.Font(None, 150)
+title_font.set_bold(True)
+title_font.set_italic(True)
 big_font = pygame.font.Font(None, 48)
 font = pygame.font.Font(None, 19)
 medium_font = pygame.font.Font(None,18)
@@ -25,10 +28,10 @@ BULLET_CONTAINERS = (UPDATEABLE_GROUP,DRAWABLE_GROUP,BULLET_GROUP)
 
 # Screen Constants
 # These constants are used to define the dimensions of the game screen
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
 SCREEN_HALF_WIDTH = SCREEN_WIDTH // 2
-SCREEN_HALF_HEIGHT = SCREEN_HEIGHT //2 - 50
+SCREEN_HALF_HEIGHT = SCREEN_HEIGHT // 2
 
 # Asteroid constants
 # These constants are used to define the properties of asteroids in the game
@@ -70,7 +73,7 @@ SHOT_COLOR = [155,0,155]
 STATUSBAR_COLOR = [255,255,255]
 CONTROLBAR_COLOR = [255,255,255]
 PAUSED_COLOR = [255,255,0]
-TITLE_COLOR = [255,255,255]
+TITLE_COLOR = [0,63,255]
 
 # Shot Constants
 # These constants are used to define the properties of shots in the game
