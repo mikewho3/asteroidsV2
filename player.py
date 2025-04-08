@@ -154,7 +154,6 @@ class Player(circleshape.CircleShape):
 
     # Resets the player ship to the center of the screen
     def reset(self):
-        self.dead_timer = constants.PLAYER_DEATH_TIMER
         self.x = constants.SCREEN_WIDTH / 2
         self.y = constants.SCREEN_HEIGHT / 2
         self.velocity_x = 0

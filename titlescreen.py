@@ -11,4 +11,4 @@ def title_screen():
     title_text_line3 = constants.font.render(f"        Press -ENTER- to start",True, constants.TITLE_COLOR)
     gamestate.screen.blit(title_text,(constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(title_text)//2, constants.SCREEN_HEIGHT//2 - 50))
     gamestate.screen.blit(title_text_line2,(constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(title_text_line2)//2, constants.SCREEN_HALF_HEIGHT + constants.big_font.get_linesize()))
-    gamestate.screen.blit(title_text_line3,(constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(title_text_line2)//2, constants.SCREEN_HALF_HEIGHT + constants.big_font.get_linesize() * 2))
+    gamestate.screen.blit(title_text_line3,(constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(title_text_line2)//2, constants.SCREEN_HALF_HEIGHT + constants.big_font.get_linesize() + constants.font.get_linesize()))

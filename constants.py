@@ -4,7 +4,7 @@ import pygame
 # Constant values are defined here
 
 # Game Version
-VERSION = 2.00
+VERSION = 2.10
 # Set Fonts
 pygame.font.init()
 big_font = pygame.font.Font(None, 48)
@@ -46,8 +46,8 @@ PLAYER_SPEED = 200
 PLAYER_SHOOT_SPEED = 500
 PLAYER_SHOOT_COOLDOWN = 0.3
 PLAYER_STARTING_LIVES = 3
-PLAYER_INVINCIBILITY_TIMER = 6.8
-PLAYER_DEATH_TIMER = 4.8
+PLAYER_INVINCIBILITY_TIMER = 5.5
+PLAYER_DEATH_TIMER = 3.1
 TRI_SHOT_DURATION = 8
 KEY_LOCK_TIMER = 1
 

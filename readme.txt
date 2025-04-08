@@ -12,6 +12,7 @@ The Following Music / Sound Effects are used with permission, under license from
 https://pixabay.com/service/license-summary/
 
 Music:
+Jungle-ish beat for video games by IHateTuesdays
 Asteroids by Muzaproduction
 
 Sound Effects:

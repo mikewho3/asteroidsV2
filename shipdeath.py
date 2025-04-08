@@ -21,7 +21,7 @@ def check_ship_death():
         died = constants.big_font.render(f"You Died! Extra Lives: {gamestate.ship.lives}",True, constants.GAMEOVER_COLOR)
         gamestate.screen.blit(died,(constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(died)//2, constants.SCREEN_HEIGHT//2 - 50))
         pygame.display.flip()
-        pygame.time.delay(4000)
+        pygame.time.delay(3000)
         return True  # Ship is dead but has lives left, return True to continue the game
     else:
         status_bar = statusbars.status_bar(constants.GAMEOVER_COLOR)
@@ -32,6 +32,6 @@ def check_ship_death():
         died = constants.big_font.render(f"----GAME OVER ----",True, constants.GAMEOVER_COLOR)
         gamestate.screen.blit(died,(constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(died)//2, constants.SCREEN_HEIGHT//2 - 50))
         pygame.display.flip()
-        pygame.time.delay(6000)
+        pygame.time.delay(3000)
         return False  # Ship is dead and no lives left, return False to end the game
 

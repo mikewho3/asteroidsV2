@@ -29,7 +29,14 @@ def main():
     gamestate.clock = pygame.time.Clock()
     # Start the Game
     print(f"Starting Asteroids Version {constants.VERSION}")
+    gamestate.high_scores = highscore.load_high_scores()
+    gamestate.high_scores = gamestate.high_scores[:10]  # Limit to top 10 scores
+    gamestate.top_player_name = gamestate.high_scores[0][0]
+    gamestate.top_player_score = gamestate.high_scores[0][1]
     while gamestate.running:
+        # Start the game music
+        if pygame.mixer.music.get_busy() == 0: #if the music is not playing, play the music
+            music.load_music(file="title.mp3", volume=0.5, play_time=-1)
         while gamestate.main_menu:
             if gamestate.screen is None: #if the screen is None, create the screen
                 gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
@@ -40,6 +47,7 @@ def main():
                     return
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
+                        music.stop_music() #stop the music
                         gamestate.playing = True #set the running variable to True to start the game
                         gamestate.main_menu = False
             titlescreen.title_screen() #display the title screen
@@ -65,12 +73,6 @@ def main():
                 gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
             # Fill the screen with the background color
             gamestate.screen.fill(constants.SCREEN_COLOR)
-            # Initialize the high score list if it is None
-            if gamestate.high_scores is None:
-                gamestate.high_scores = highscore.load_high_scores()
-                gamestate.high_scores = gamestate.high_scores[:10]  # Limit to top 10 scores
-                gamestate.top_player_name = gamestate.high_scores[0][0]
-                gamestate.top_player_score = gamestate.high_scores[0][1]
             # Create the player ship
             if gamestate.ship is None:
                 gamestate.ship = player.Player.create_ship()
@@ -88,8 +90,9 @@ def main():
                     gamestate.ship.position.y = 0
             # Update the game state
             if not gamestate.paused: #if the game is not paused, update the game state
-                for x in constants.UPDATEABLE_GROUP:
-                    x.update(gamestate.dt)
+                if gamestate.running:
+                    for x in constants.UPDATEABLE_GROUP:
+                        x.update(gamestate.dt)
             else:
                 # If the game is paused, stop updating the game state
                 # Display the pause screen
@@ -147,8 +150,6 @@ def main():
                         print(f"Game Score: {gamestate.score}")
                         print(f"Current High Score: {gamestate.top_player_score} by {gamestate.top_player_name}")
                         music.stop_music() #stop the music
-                        gamestate.ship.reset()
-                        gamestate.ship.lives = constants.PLAYER_STARTING_LIVES #reset the ship lives
                         for big_space_rock in constants.UPDATEABLE_GROUP: #reset the asteroids
                             if isinstance(big_space_rock, asteroids.Asteroid):
                                 big_space_rock.kill()
@@ -156,8 +157,11 @@ def main():
                             if isinstance(asfield, asteroidfield.AsteroidField):
                                 asfield.kill()
                         gamestate.asteroid_field = None #reset the asteroid field
-                        gamestate.main_menu = True
+                        gamestate.ship.reset()
+                        gamestate.score = 0 #reset the score
+                        gamestate.ship.lives = constants.PLAYER_STARTING_LIVES #reset the ship lives
                         gamestate.playing = False
+                        gamestate.main_menu = True
 
             gamestate.dt = gamestate.clock.tick(60) / 1000  #make the clock tick
         
