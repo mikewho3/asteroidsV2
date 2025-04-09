@@ -5,6 +5,7 @@ import constants
 import circleshape
 import random
 import soundeffects
+import gamestate
 
 
 
@@ -38,15 +39,15 @@ class Asteroid(circleshape.CircleShape):
     def split(self):
         self.kill()
         soundeffects.play_soundeffect("boom.mp3",0.6,1500)
-        if self.radius <= constants.ASTEROID_MIN_RADIUS:
+        if self.radius <= gamestate.asteroid_min_radius:
             return
         angle = random.uniform(20,50)
         asteroid_a_angle = self.velocity.rotate(angle)
         asteroid_b_angle = self.velocity.rotate(-angle)
-        new_radius = self.radius - constants.ASTEROID_MIN_RADIUS
+        new_radius = self.radius - gamestate.asteroid_min_radius
         asteroid_a = Asteroid(self.position.x,self.position.y,new_radius)
         asteroid_b = Asteroid(self.position.x,self.position.y,new_radius)
-        asteroid_a_scale = asteroid_a_angle * constants.ASTEROID_VELOCITY_MULTIPLIER
-        asteroid_b_scale = asteroid_b_angle * constants.ASTEROID_VELOCITY_MULTIPLIER
+        asteroid_a_scale = asteroid_a_angle * gamestate.asteroid_velocity_multiplier
+        asteroid_b_scale = asteroid_b_angle * gamestate.asteroid_velocity_multiplier
         asteroid_a.velocity = pygame.Vector2(asteroid_a_scale)
         asteroid_b.velocity = pygame.Vector2(asteroid_b_scale)

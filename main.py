@@ -21,6 +21,7 @@ import shipdeath
 import highscore
 import pausescreen
 import titlescreen
+import gamemodes
 
 def main():
     # Initialize Pygame
@@ -57,9 +58,48 @@ def main():
                         music.stop_music() #stop the music
                         gamestate.score_menu = True #set the score menu variable to True to start the high score menu
                         gamestate.main_menu = False
+                    if event.key == pygame.K_g:
+                        #music.stop_music() #stop the music # commented out to allow the music to play in the game mode menu
+                        gamestate.mode_menu = True #set the score menu variable to True to start the game mode menu
+                        gamestate.main_menu = False
+                    if event.key == pygame.K_KP_ENTER:
+                        #debuginfo = constants.big_font.get_linesize()
+                        #print(f"Debug: big_font.get_linesize() = {debuginfo}")
+                        pass
             titlescreen.title_screen()
             #titlescreen.title_screen() #display the title screen
             pygame.display.flip() #update the display
+
+        # Here is the game mode menu loop.
+        while gamestate.mode_menu:
+            #if pygame.mixer.music.get_busy() == 0: #if the music is not playing, play the music # currently just playing main menu music
+                #music.load_music(file="gamemode.mp3", volume=0.5, play_time=-1, set_pos=1) # currently there is no game mode music file, if the comment is removed it will crash the game
+            if gamestate.screen is None:  # if the screen is None, create the screen
+                gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+            gamestate.screen.fill(constants.SCREEN_COLOR)  # fill the screen with the background color
+            gamemodes.game_mode_screen()  # display the game mode menu
+            pygame.display.flip()  # update the display
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()  # if the game window is closed, exit the game
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_e:
+                        gamestate.difficulty = 1  # set the difficulty to easy
+                    elif event.key == pygame.K_n:
+                        gamestate.difficulty = 2 # set the difficulty to normal
+                    elif event.key == pygame.K_h:
+                        gamestate.difficulty = 3 # set the difficulty to hard
+                    elif event.key == pygame.K_i:
+                        gamestate.difficulty = 4 # set the difficulty to insane
+                    elif event.key == pygame.K_o:
+                        gamestate.difficulty = 5 # set the difficulty to I Want to Die
+                    else: # if any other key is pressed, go back to the main menu
+                        #music.stop_music()  # stop the music # commented out to allow the music to play in the game mode menu
+                        gamestate.main_menu = True  # set the main menu variable to True to start the main menu loop
+                        gamestate.mode_menu = False  # exit the high score menu
+                    
+
+
 
         # Here is the high score menu loop.  This loop will run when gamestate.score_menu is True and will display the top 10 high scores from gamestate.high_scores using the highscore module with highscore.display_high_scores()
         while gamestate.score_menu:
@@ -84,6 +124,44 @@ def main():
                 gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
             # Fill the screen with the background color
             gamestate.screen.fill(constants.SCREEN_COLOR)
+            # Set the difficulty
+            if gamestate.is_difficulty_set == False: #if the difficulty is not set, set the difficulty
+                if gamestate.difficulty == 1:
+                    gamestate.player_starting_lives = 5
+                    if gamestate.ship is not None:
+                        gamestate.ship.lives = 5
+                    gamestate.player_speed = 300
+                    gamestate.asteroid_spawn_rate = 1
+                    gamestate.player_can_use_abilities = True
+                elif gamestate.difficulty == 2:
+                    gamestate.player_starting_lives = 3
+                    if gamestate.ship is not None:
+                        gamestate.ship.lives = 3
+                    gamestate.player_speed = 250
+                    gamestate.asteroid_spawn_rate = 0.8
+                    gamestate.player_can_use_abilities = True
+                elif gamestate.difficulty == 3:
+                    gamestate.player_starting_lives = 2
+                    if gamestate.ship is not None:
+                        gamestate.ship.lives = 2
+                    gamestate.player_speed = 200
+                    gamestate.asteroid_spawn_rate = 0.5
+                    gamestate.player_can_use_abilities = True
+                elif gamestate.difficulty == 4:
+                    gamestate.player_starting_lives = 1
+                    if gamestate.ship is not None:
+                        gamestate.ship.lives = 1
+                    gamestate.player_speed = 150
+                    gamestate.asteroid_spawn_rate = 0.3
+                    gamestate.player_can_use_abilities = True
+                else:
+                    gamestate.player_starting_lives = 0
+                    if gamestate.ship is not None:
+                        gamestate.ship.lives = 0
+                    gamestate.player_speed = 100
+                    gamestate.asteroid_spawn_rate = 0.1
+                    gamestate.player_can_use_abilities = False
+                gamestate.is_difficulty_set = True #set the difficulty to True so it doesn't set again
             # Create the player ship
             if gamestate.ship is None:
                 gamestate.ship = player.Player.create_ship()
@@ -114,6 +192,7 @@ def main():
                     if event.key == pygame.K_q and gamestate.paused == True:
                         music.stop_music() # stop the music
                         gamestate.game_reset() #reset the game
+                        gamestate.is_difficulty_set = False #reset the difficulty
                         gamestate.main_menu = True # if the game is paused and the Q key is pressed, go to the main menu
                         gamestate.playing = False # set the playing variable to False to exit the game loop
                         gamestate.paused = False # reset the paused variable to false before we exit the loop
@@ -189,6 +268,7 @@ def main():
                         print(f"Game Score: {gamestate.score}")
                         print(f"Current High Score: {gamestate.top_player_score} by {gamestate.top_player_name}")
                         gamestate.game_reset() #reset the game
+                        gamestate.is_difficulty_set = False #reset the difficulty
                         music.stop_music() #stop the music
                         gamestate.playing = False
                         gamestate.main_menu = True

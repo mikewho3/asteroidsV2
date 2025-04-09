@@ -18,7 +18,7 @@ def draw_text_line1():
 def draw_text_line2():
     # This function will draw the second text line on the screen
     title_text_line = constants.big_font.render(f"Play the Game | Press -ENTER-",True, constants.TITLE_COLOR)
-    gamestate.screen.blit(title_text_line,(10, 200 - constants.big_font.get_linesize()))
+    gamestate.screen.blit(title_text_line,(10, 164))
 
 def draw_menu_option_high_score():
     # This function will draw the high score option on the screen
@@ -28,7 +28,7 @@ def draw_menu_option_high_score():
 def draw_menu_option_game_mode():
     # This function will draw the game mode option on the screen
     menu_option_game_mode = constants.big_font.render(f"Game Mode | Press -G-",True, constants.GAME_MODE_COLOR)
-    gamestate.screen.blit(menu_option_game_mode,(10,200 + constants.big_font.get_linesize()))
+    gamestate.screen.blit(menu_option_game_mode,(10,236))
 
 def title_screen():
     # This function will display the title screen

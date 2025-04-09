@@ -4,14 +4,15 @@ import pygame
 # Constant values are defined here
 
 # Game Version
-VERSION = 2.15
+VERSION = 2.35
 # Set Fonts
 pygame.font.init()
 title_font = pygame.font.Font(None, 150)
 title_font.set_bold(True)
 title_font.set_italic(True)
-header_score_font = pygame.font.Font(None, 100)
-header_score_font.set_bold(True)
+header_font = pygame.font.Font(None, 100)
+header_font.set_bold(True)
+header_font_notbold = pygame.font.Font(None, 100)
 big_font = pygame.font.Font(None, 48)
 paused_font = pygame.font.Font(None, 72)
 paused_font.set_bold(True)
@@ -40,20 +41,13 @@ SCREEN_HALF_HEIGHT = 540
 
 # Asteroid constants
 # These constants are used to define the properties of asteroids in the game
-ASTEROID_MIN_RADIUS = 20
-ASTEROID_KINDS = 3
-ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_KINDS
 ASTEROID_LIFESPAN = 20
-ASTEROID_VELOCITY_MULTIPLIER = 1.5
+
 
 # Player Constants
 # These constants are used to define the properties of the player in the game
-PLAYER_RADIUS = 20
-PLAYER_TURN_SPEED = 300
-PLAYER_SPEED = 200
 PLAYER_SHOOT_SPEED = 500
 PLAYER_SHOOT_COOLDOWN = 0.3
-PLAYER_STARTING_LIVES = 3
 PLAYER_INVINCIBILITY_TIMER = 5.5
 PLAYER_DEATH_TIMER = 3.1
 TRI_SHOT_DURATION = 8

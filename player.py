@@ -15,7 +15,7 @@ import gamestate
 class Player(circleshape.CircleShape):
     def __init__(self,x,y):  #initialize
         self.containers = constants.PLAYER_CONTAINERS # Set the container for the player sprite
-        super().__init__(x,y,constants.PLAYER_RADIUS)  #call parent initialize - required for draw/update
+        super().__init__(x,y,gamestate.player_radius)  #call parent initialize - required for draw/update
 
         # Player Ship Direction
         self.rotation = 0
@@ -25,7 +25,7 @@ class Player(circleshape.CircleShape):
         # Player Ship Death Timer (locks controls while dead)
         self.dead_timer = 0
         # Player Ship Starting Lives
-        self.lives = constants.PLAYER_STARTING_LIVES
+        self.lives = gamestate.player_starting_lives
         # Player Spinning Attack Variables
         self.is_spinning = False
         self.spin_start_angle = 0
@@ -33,9 +33,18 @@ class Player(circleshape.CircleShape):
         self.spin_cooldown = 0
         self.spin_cooldown_max = constants.DEATH_FLOWER_COOLDOWN
         # Player Message Defaults
-        self.death_flower = "Available!"
-        self.bullet_stream_msg = "Available!"
-        self.tri_shot_msg = "Available!"
+        if gamestate.player_can_use_abilities == False:
+            self.death_flower = "DISABLED"
+        else:
+            self.death_flower = "Available"
+        if gamestate.player_can_use_abilities == False:
+            self.bullet_stream_msg = "DISABLED"
+        else:
+            self.bullet_stream_msg = "Available"
+        if gamestate.player_can_use_abilities == False:
+            self.tri_shot_msg = "DISABLED"
+        else:
+            self.tri_shot_msg = "Available"
         # Player Bullet Stream Variables
         self.bullet_stream_cooldown = 0
         self.is_bullet_stream = False
@@ -135,10 +144,10 @@ class Player(circleshape.CircleShape):
 
     def move(self,dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        self.position += forward * constants.PLAYER_SPEED * dt
+        self.position += forward * gamestate.player_speed * dt
 
     def rotate(self,dt):
-        self.rotation += (constants.PLAYER_TURN_SPEED * dt)
+        self.rotation += (gamestate.player_turn_speed * dt)
 
     def draw_ship(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -159,6 +168,16 @@ class Player(circleshape.CircleShape):
         self.velocity_x = 0
         self.velocity_y = 0
         self.position = pygame.Vector2(self.x,self.y)
+        self.bullet_stream_cooldown = 0
+        self.tri_shot_cooldown = 0
+        self.spin_cooldown = 0
+        self.is_bullet_stream = False
+        self.is_tri_shot = False
+        self.is_spinning = False
+        self.shot_timer = 0
+        self.shot_timer_bypass = 0
+        self.tri_shot_bypass = 0
+        self.shot_timer_bypass = 0
 
     def update(self, dt):
         # Updates everything about the player ship based on the delta time clock which is called in main()
@@ -206,12 +225,16 @@ class Player(circleshape.CircleShape):
         #Death Blossom Message Control
         if self.spin_cooldown > 0:
             self.death_flower = "Cooldown: "
+        elif gamestate.player_can_use_abilities == False:
+            self.death_flower = "DISABLED"
         else:
             self.death_flower = "Available!"
 
         #Bullet Stream Message Control
         if self.bullet_stream_cooldown > 0:  
             self.bullet_stream_msg = "Cooldown: "
+        elif gamestate.player_can_use_abilities == False:
+            self.bullet_stream_msg = "DISABLED"
         elif self.shot_timer_bypass > 0:
             self.bullet_stream_msg = "-ACTIVE-: "
         else:
@@ -219,6 +242,8 @@ class Player(circleshape.CircleShape):
         #TriShot Message Control
         if self.tri_shot_cooldown > 0:  
             self.tri_shot_msg = "Cooldown: "
+        elif gamestate.player_can_use_abilities == False:
+            self.tri_shot_msg = "DISABLED"
         elif self.tri_shot_bypass > 0:
             self.tri_shot_msg = "-ACTIVE-: "
         else:
@@ -295,66 +320,6 @@ class Player(circleshape.CircleShape):
                     soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
                     self.sound_delay_cooldown = constants.SOUND_DELAY
 
-
-        #############################################################################################
-        # Difficulty Keybinds
-        # NOTE: I plan on removing these after the difficulty selection screen is implemented
-        #############################################################################################
-
-        if keys[pygame.K_1]:
-            if self.dead_timer > 0 or gamestate.key_lock_1 > 0: # Check if the key lock is active or the player is dead
-                    if soundeffects.get_sound_timer():
-                        soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
-                        self.sound_delay_cooldown = constants.SOUND_DELAY
-            else:
-                if gamestate.difficulty != 1 and gamestate.difficulty != 5: # Check if the current difficulty is not 1 or 5
-                    gamestate.difficulty = 1
-                    gamestate.asteroid_spawn_rate = 0.8
-                    self.sound_delay_cooldown = constants.SOUND_DELAY
-                    gamestate.key_lock_1 = constants.KEY_LOCK_TIMER
-                else:
-                    if soundeffects.get_sound_timer():
-                        soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
-                        self.sound_delay_cooldown = constants.SOUND_DELAY
-        if keys[pygame.K_2]:
-            if self.dead_timer > 0 or gamestate.key_lock_2 > 0: # Check if the key lock is active or the player is dead
-                    soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
-                    self.sound_delay_cooldown = constants.SOUND_DELAY
-            else:
-                if gamestate.difficulty != 2 and gamestate.difficulty != 5: # Check if the current difficulty is not 2 or 5
-                    gamestate.key_lock_2 = constants.KEY_LOCK_TIMER # Set the key lock to 1 to prevent double press
-                    gamestate.difficulty = 2
-                    gamestate.asteroid_spawn_rate = 0.5
-                    self.sound_delay_cooldown = constants.SOUND_DELAY
-                else:
-                    if soundeffects.get_sound_timer():
-                        soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
-                        self.sound_delay_cooldown = constants.SOUND_DELAY
-        if keys[pygame.K_5]:
-            if self.dead_timer > 0 or gamestate.key_lock_5 > 0:
-                soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
-                self.sound_delay_cooldown = constants.SOUND_DELAY
-            else:
-                if gamestate.difficulty != 5:
-                    gamestate.key_lock_5 = constants.KEY_LOCK_TIMER
-                    gamestate.difficulty = 5
-                    gamestate.asteroid_spawn_rate = 0.1
-                    self.invincible_timer = 8
-                    self.lives = 0
-                    self.sound_delay_cooldown = constants.SOUND_DELAY
-                    gamestate.key_lock_5 = constants.KEY_LOCK_TIMER
-                    screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
-                    warning = constants.big_font.render("-!-WARNING-!- Incoming Asteroid Storm -!-WARNING-!-",True, constants.GAMEOVER_COLOR)
-                    warning_2 = constants.big_font.render("Your Extra Ships Were Destroyed In The Storm",True, constants.GAMEOVER_COLOR)
-                    screen.blit(warning,(constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(warning)//2, constants.SCREEN_HEIGHT//2 - 50))
-                    screen.blit(warning_2,(constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(warning)//2 + 50, constants.SCREEN_HEIGHT//2 - 50 + constants.big_font.get_linesize()))
-                    pygame.display.flip()
-                    pygame.time.delay(5000)
-                    
-                else:
-                    if soundeffects.get_sound_timer():
-                        soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
-                        self.sound_delay_cooldown = constants.SOUND_DELAY
         
         ##############################################
         # Movement Keybinds
@@ -411,7 +376,7 @@ class Player(circleshape.CircleShape):
         
         # Death Blossom Keybind
         if keys[pygame.K_f]: 
-            if self.dead_timer > 0 or self.spin_cooldown > 0: # Check if the player is dead or the spin cooldown is active
+            if self.dead_timer > 0 or self.spin_cooldown > 0 or gamestate.player_can_use_abilities == False: # Check if the player is dead or the spin cooldown is active
                 if soundeffects.get_sound_timer():
                     soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
                     self.sound_delay_cooldown = constants.SOUND_DELAY
@@ -423,7 +388,7 @@ class Player(circleshape.CircleShape):
 
         # Bullet Stream Keybind
         if keys[pygame.K_v]:  #Bullet Stream
-            if self.dead_timer > 0 or self.bullet_stream_cooldown > 0 or self.shot_timer_bypass > 0: # Check if the player is dead, or the cooldown is active:
+            if self.dead_timer > 0 or self.bullet_stream_cooldown > 0 or self.shot_timer_bypass > 0 or gamestate.player_can_use_abilities == False: # Check if the player is dead, or the cooldown is active:
                 if soundeffects.get_sound_timer():
                     soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
                     self.sound_delay_cooldown = constants.SOUND_DELAY
@@ -435,7 +400,7 @@ class Player(circleshape.CircleShape):
         
         # TriShot Keybind
         if keys[pygame.K_t]:  #TriShot
-            if self.dead_timer > 0 or self.tri_shot_cooldown > 0 or self.tri_shot_bypass > 0 or self.is_bullet_stream:
+            if self.dead_timer > 0 or self.tri_shot_cooldown > 0 or self.tri_shot_bypass > 0 or self.is_bullet_stream  or gamestate.player_can_use_abilities == False:
                 if soundeffects.get_sound_timer():
                     soundeffects.play_soundeffect("error.mp3",1,1500) # Play error sound
                     self.sound_delay_cooldown = constants.SOUND_DELAY

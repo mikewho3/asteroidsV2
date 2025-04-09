@@ -8,11 +8,12 @@ import asteroidfield
 import bullets
 
 # Is the game active and the player is playing?
-running = True # This variable is used to control the main game loop and all other game loops
+running = True # This variable is used to control all the game loops.  It MUST be set to True at all times.
 paused = False # Is the game active but paused? This variable is used to control the pause screen and the game loop
 main_menu = True # Is the game in the main menu? This variable is used to control the main menu loop
 playing = False # Is the game active and the player is playing? This variable is used to control the active game loop
 score_menu = False # Is the game in the high score menu? This variable is used to control the high score menu loop
+mode_menu = False # Is the game in the game mode menu? This variable is used to control the game mode menu loop
 
 
 # Define the ship here.  This will be changed when the player creates a ship and starts a game mode
@@ -40,10 +41,9 @@ over_9000_playing = False # This variable is used to detect if the sound effect 
 over_9000_time_started = 0 # This variable is used to store the time the sound effect started playing
 
 # Game Difficulty Variable
-difficulty = 1
-
-# Asteroid Variables
-asteroid_spawn_rate = 0.8
+# 1 = Easy, 2 = Medium, 3 = Hard, 4 = Insane 5 = I Want to Die
+difficulty = 2
+is_difficulty_set = False # This variable is used to detect if the difficulty has been loaded
 
 # Sound Effect Timer
 sound_effect_timer = 0
@@ -61,6 +61,19 @@ key_lock_2 = 0
 key_lock_5 = 0
 key_lock_spacebar = 0
 
+# Asteroid Variables
+asteroid_spawn_rate = 1
+asteroid_min_radius = 20
+asteroid_kinds = 3
+asteroid_max_radius = asteroid_min_radius * asteroid_kinds
+asteroid_velocity_multiplier = 1.5
+
+# Player Variables
+player_radius = 20
+player_turn_speed = 300
+player_speed = 250
+player_starting_lives = 5
+player_can_use_abilities = True # This variable is used to control the ability to use abilities
 
 def game_reset():
     for big_space_rock in constants.UPDATEABLE_GROUP: #reset the asteroids
@@ -72,7 +85,8 @@ def game_reset():
         for bullet in constants.UPDATEABLE_GROUP: #reset the asteroid field
             if isinstance(bullet, bullets.Shot):
                 bullet.kill()
+    global asteroid_field, score, ship, player_starting_lives
     asteroid_field = None #reset the asteroid field
     ship.reset()
     score = 0 #reset the score
-    ship.lives = constants.PLAYER_STARTING_LIVES #reset the ship lives
+    ship.lives = player_starting_lives #reset the ship lives

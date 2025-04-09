@@ -57,8 +57,19 @@ def get_player_name(screen, font,score):
     return name
 
 def save_high_score(name, score):
+    diff = None
+    if gamestate.difficulty == 1:
+        diff = "Easy"
+    elif gamestate.difficulty == 2:
+        diff = "Normal"
+    elif gamestate.difficulty == 3:
+        diff = "Hard"
+    elif gamestate.difficulty == 4:
+        diff = "Insane"
+    elif gamestate.difficulty == 5:
+        diff = "I Want to Die"
     with open("high_scores.txt", "a") as file:
-        file.write(f"{name},{score}\n")
+        file.write(f"{name},{score},{diff}\n")
 
 def load_high_scores():
     high_scores = []
@@ -66,19 +77,19 @@ def load_high_scores():
         with open("high_scores.txt", "r") as file:
             for line in file:
                 if line.strip():  # Skip empty lines
-                    name, score = line.strip().split(",")
-                    high_scores.append((name, int(score)))
+                    name, score, diff = line.strip().split(",")
+                    high_scores.append((name, int(score), str(diff)))
         # Sort high scores by score (highest first)
         high_scores.sort(key=lambda x: x[1], reverse=True)
     except FileNotFoundError:
         with open("high_scores.txt", "a") as file:
-            file.write(f"No One Yet...,0\n")
+            file.write(f"No One Yet...,1,Easy\n")
         print("No high scores file found.")
         with open("high_scores.txt", "r") as file:
             for line in file:
                 if line.strip():  # Skip empty lines
-                    name, score = line.strip().split(",")
-                    high_scores.append((name, int(score)))
+                    name, score, diff = line.strip().split(",")
+                    high_scores.append((name, int(score), str(diff)))
         # Sort high scores by score (highest first)
         high_scores.sort(key=lambda x: x[1], reverse=True)
         high_scores = high_scores[:10]  # Limit to top 10 scores
@@ -95,7 +106,7 @@ def get_top_player():
         top_score = high_scores[0][1]        # First tuple's second element (score)
         return top_player_name, top_score
     else:
-        return "No One Yet...", 0  # Default values if no high scores exist
+        return "No One Yet...", 1  # Default values if no high scores exist
 
 def display_high_scores(screen, font):
     load_high_scores()  # Ensure high scores are updated before displaying
@@ -104,21 +115,21 @@ def display_high_scores(screen, font):
     y_position = 300
     
     # Title
-    title = constants.header_score_font.render("HIGH SCORES", True, constants.HIGH_SCORE_COLOR)
+    title = constants.header_font.render("HIGH SCORES", True, constants.HIGH_SCORE_COLOR)
     screen.blit(title, (100, 200))
     
     # List of scores
-    for i, (name, score) in enumerate(gamestate.high_scores[:10]):  # Display top 10
+    for i, (name, score, diff) in enumerate(gamestate.high_scores[:10]):  # Display top 10
         if score > 9000:
-            text = font.render(f"{i+1}. Name: {name} | Score: {score}  >>> ITS OVER 9,000!!!!! <<<", True, constants.GAMEOVER_COLOR)
+            text = font.render(f"{i+1}. Name: {name} | Score: {score} | Difficulty: {diff}>>> ITS OVER 9,000!!!!! <<<", True, constants.GAMEOVER_COLOR)
         else:
-            text = font.render(f"{i+1}. Name: {name} | Score: {score}", True, constants.HIGH_SCORE_COLOR)
+            text = font.render(f"{i+1}. Name: {name} | Score: {score} | Difficulty: {diff}", True, constants.HIGH_SCORE_COLOR)
         screen.blit(text, (100, y_position))
         y_position += 30  # Move down for next score
     
     # Instructions to continue
     if y_position > 300:  # If any scores were displayed
-        continue_text = font.render("Press any key to continue", True, constants.HIGH_SCORE_COLOR)
+        continue_text = constants.big_font.render("Press any key to continue", True, constants.HIGH_SCORE_COLOR)
         screen.blit(continue_text, (constants.SCREEN_WIDTH//2 - continue_text.get_width()//2, y_position + 30))
 
 
@@ -131,13 +142,24 @@ def add_high_scores(new_score):
     
     # Create a new list for updated scores
     updated_scores = []
+    diff = None
+    if gamestate.difficulty == 1:
+        diff = "Easy"
+    elif gamestate.difficulty == 2:
+        diff = "Normal"
+    elif gamestate.difficulty == 3:
+        diff = "Hard"
+    elif gamestate.difficulty == 4:
+        diff = "Insane"
+    elif gamestate.difficulty == 5:
+        diff = "I Want to Die"
     
     # Check if the new score matches or beats any existing scores
-    for i, (name, score) in enumerate(high_scores):
-        if new_score >= score and not score_added:
+    for i, (name, score, internal_diff) in enumerate(high_scores):
+        if new_score >= score and not score_added and score > 0:
             player_name = get_player_name(gamestate.screen, constants.big_font,new_score)
             # Add the new score here (replacing the equal score or inserting before lower score)
-            updated_scores.append((player_name, new_score))
+            updated_scores.append((player_name, new_score, diff))
             score_added = True
             
             # If scores are equal, skip the old entry (effectively replacing it)
@@ -145,12 +167,12 @@ def add_high_scores(new_score):
                 continue
                 
         # Add the existing score to our updated list
-        updated_scores.append((name, score))
+        updated_scores.append((name, score, internal_diff))
     
     # If the score hasn't been added yet (lower than all existing scores)
     # and we have fewer than 10 scores, add it at the end
-    if not score_added and len(high_scores) < 10:
-        updated_scores.append((player_name, new_score))
+    if not score_added and len(high_scores) < 10 and new_score > 0:
+        updated_scores.append((player_name, new_score, diff))
     
     # Sort again just to be safe
     updated_scores.sort(key=lambda x: x[1], reverse=True)
@@ -160,8 +182,8 @@ def add_high_scores(new_score):
     
     # Save the updated high scores back to the file
     with open("high_scores.txt", "w") as file:  # Note: "w" mode overwrites the file
-        for name, score in updated_scores:
-            file.write(f"{name},{score}\n")
+        for name, score, diff in updated_scores:
+            file.write(f"{name},{score},{diff}\n")
     update_high_scores()  # Update the gamestate with new high scores
     return
 

@@ -12,22 +12,22 @@ class AsteroidField(pygame.sprite.Sprite):
     edges = [
         [
             pygame.Vector2(1, 0),
-            lambda y: pygame.Vector2(-constants.ASTEROID_MAX_RADIUS, y * constants.SCREEN_HEIGHT),
+            lambda y: pygame.Vector2(-gamestate.asteroid_max_radius, y * constants.SCREEN_HEIGHT),
         ],
         [
             pygame.Vector2(-1, 0),
             lambda y: pygame.Vector2(
-                constants.SCREEN_WIDTH + constants.ASTEROID_MAX_RADIUS, y * constants.SCREEN_HEIGHT
+                constants.SCREEN_WIDTH + gamestate.asteroid_max_radius, y * constants.SCREEN_HEIGHT
             ),
         ],
         [
             pygame.Vector2(0, 1),
-            lambda x: pygame.Vector2(x * constants.SCREEN_WIDTH, -constants.ASTEROID_MAX_RADIUS),
+            lambda x: pygame.Vector2(x * constants.SCREEN_WIDTH, -gamestate.asteroid_max_radius),
         ],
         [
             pygame.Vector2(0, -1),
             lambda x: pygame.Vector2(
-                x * constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT + constants.ASTEROID_MAX_RADIUS
+                x * constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT + gamestate.asteroid_max_radius
             ),
         ],
     ]
@@ -56,6 +56,6 @@ class AsteroidField(pygame.sprite.Sprite):
             velocity = edge[0] * speed
             velocity = velocity.rotate(random.randint(-30, 30))
             position = edge[1](random.uniform(0, 1))
-            kind = random.randint(1, constants.ASTEROID_KINDS)
-            self.spawn(constants.ASTEROID_MIN_RADIUS * kind, position, velocity)
-            #print(f"Debug: if-statement asteroid spawned at {position.x}, {position.y} with radius {constants.ASTEROID_MIN_RADIUS * kind}")
+            kind = random.randint(1, gamestate.asteroid_kinds)
+            self.spawn(gamestate.asteroid_min_radius * kind, position, velocity)
+            #print(f"Debug: if-statement asteroid spawned at {position.x}, {position.y} with radius {gamestate.asteroid_min_radius * kind}")
