@@ -30,12 +30,8 @@ def main():
     # Start the Game
     print(f"Starting Asteroids Version {constants.VERSION}")
     # Load the high scores
-    gamestate.high_scores = highscore.load_high_scores() # attempt to load the high scores from the file
-    if gamestate.high_scores: # if the high scores are not empty, limit the list to 10
-        gamestate.high_scores = gamestate.high_scores[:10]  # Limit to top 10 scores
-    gamestate.top_player_name, gamestate.top_player_score = highscore.get_top_player() # get the top player score and name (has a set default if the list is empty)
-    #gamestate.top_player_name = gamestate.high_scores[0][0]
-    #gamestate.top_player_score = gamestate.high_scores[0][1]
+    highscore.update_high_scores() # attempt to load the high scores from the file
+    
 
     # Begin the MAIN loop.  This loop runs EVERYTHING, the game and all menus.  Each is it's own seperate loop
     while gamestate.running:
@@ -61,7 +57,8 @@ def main():
                         music.stop_music() #stop the music
                         gamestate.score_menu = True #set the score menu variable to True to start the high score menu
                         gamestate.main_menu = False
-            titlescreen.title_screen() #display the title screen
+            titlescreen.title_screen()
+            #titlescreen.title_screen() #display the title screen
             pygame.display.flip() #update the display
 
         # Here is the high score menu loop.  This loop will run when gamestate.score_menu is True and will display the top 10 high scores from gamestate.high_scores using the highscore module with highscore.display_high_scores()
@@ -83,9 +80,26 @@ def main():
 
         # Begin the main game loop (active game loop)
         while gamestate.playing:
+            if gamestate.screen is None: #if the screen is None, create the screen
+                gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+            # Fill the screen with the background color
+            gamestate.screen.fill(constants.SCREEN_COLOR)
+            # Create the player ship
+            if gamestate.ship is None:
+                gamestate.ship = player.Player.create_ship()
+            # Create the asteroid field
+            if gamestate.asteroid_field is None:
+                gamestate.asteroid_field = asteroidfield.AsteroidField()
             # Start the game music
             if pygame.mixer.music.get_busy() == 0: #if the music is not playing, play the music
                 music.load_music(file="asteroids.mp3", volume=0.5, play_time=-1)
+            # Check the timer for the special music effect
+            if gamestate.over_9000_playing == True:
+                if gamestate.paused == False: #if the game is not paused, draw the over 9000 status bar
+                    statusbars.over_9000() #display the over 9000 status bar
+                if pygame.time.get_ticks() - gamestate.over_9000_time_started >= 7500:
+                    pygame.mixer.music.fadeout(1500) #fade out the music
+                    gamestate.over_9000_playing = False #set the over 9000 music to not playing
             for event in pygame.event.get():  #for loop that stops the process if the game windows gets closed
                 if event.type == pygame.QUIT:
                     print("Game Over!")
@@ -99,32 +113,11 @@ def main():
                             gamestate.paused = not gamestate.paused  # Pause/Unpause the game if the escape key is pressed
                     if event.key == pygame.K_q and gamestate.paused == True:
                         music.stop_music() # stop the music
-                        for big_space_rock in constants.UPDATEABLE_GROUP: #reset the asteroids
-                            if isinstance(big_space_rock, asteroids.Asteroid):
-                                big_space_rock.kill()
-                        for asfield in constants.UPDATEABLE_GROUP: #reset the asteroid field
-                            if isinstance(asfield, asteroidfield.AsteroidField):
-                                asfield.kill()
-                        for bullet in constants.UPDATEABLE_GROUP: #reset the asteroid field
-                            if isinstance(bullet, bullets.Shot):
-                                bullet.kill()
-                        gamestate.asteroid_field = None #reset the asteroid field
-                        gamestate.ship.reset()
-                        gamestate.score = 0 #reset the score
-                        gamestate.ship.lives = constants.PLAYER_STARTING_LIVES #reset the ship lives
+                        gamestate.game_reset() #reset the game
                         gamestate.main_menu = True # if the game is paused and the Q key is pressed, go to the main menu
                         gamestate.playing = False # set the playing variable to False to exit the game loop
                         gamestate.paused = False # reset the paused variable to false before we exit the loop
                         break # exit the game loop NOW
-            if gamestate.screen is None: #if the screen is None, create the screen
-                gamestate.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
-            # Fill the screen with the background color
-            gamestate.screen.fill(constants.SCREEN_COLOR)
-            # Create the player ship
-            if gamestate.ship is None:
-                gamestate.ship = player.Player.create_ship()
-            if gamestate.asteroid_field is None:
-                gamestate.asteroid_field = asteroidfield.AsteroidField()
             # Don't let the ship go off the screen
             if not gamestate.paused:
                 if gamestate.ship.position.x < 0:
@@ -147,23 +140,17 @@ def main():
 
             for x in constants.DRAWABLE_GROUP:
                 if isinstance(x, asteroids.Asteroid):
-                    #print(f"Debug: drawablegroup: draw asteroid")
                     x.draw(gamestate.screen,constants.ASTEROID_COLOR)  #set the default color for asteroids
                 elif isinstance(x, player.Player):
-                    #print(f"Debug: drawablegroup: draw player")
                     x.draw(gamestate.screen,constants.PLAYER_COLOR)  #set the default color for the player ship
                 elif isinstance(x, bullets.Shot):
-                    #print(f"Debug: drawablegroup: draw bullet")
                     x.draw(gamestate.screen,constants.SHOT_COLOR)  #set the default color for the player ship
                 else:
-                    #print(f"Debug: drawablegroup: draw ELSE")
                     x.draw(gamestate.screen,[255,255,255]) #if I missed anything, draw it and make it white
 
-            # Draw the status bar
-            status_bar = statusbars.status_bar(constants.STATUSBAR_COLOR)
-            gamestate.screen.blit(status_bar, (5, 5))  # Draw the status bar at the top left corner of the screen
-            control_bar = statusbars.control_bar(constants.CONTROLBAR_COLOR)
-            gamestate.screen.blit(control_bar, (5, 5 + constants.font.get_linesize()))  # Draw the control bar at the bottom left corner of the screen
+            # Draw the status bar and control bar
+            statusbars.status_bar(constants.STATUSBAR_COLOR)
+            statusbars.control_bar(constants.CONTROLBAR_COLOR)
             pygame.display.flip()  #updates the display
 
 
@@ -181,6 +168,13 @@ def main():
                             gamestate.score += 2 # add 2 points for a medium asteroid
                         if space_rock.radius == 20:
                             gamestate.score += 3 # add 3 points for a small asteroid
+                        if gamestate.score > 9000 and gamestate.over_9000_played == False: #if the score is over 9000 and the over 9000 music has not been played yet
+                            music.stop_music() #stop the music
+                            music.load_music(file="9000.mp3", volume=1, play_time=1, set_pos=5) #play the over 9000 music
+                            gamestate.over_9000_playing = True #set the over 9000 music to playing
+                            gamestate.over_9000_time_started = pygame.time.get_ticks() #set the time the over 9000 music started playing
+                            pygame.mixer.music.queue("asteroids.mp3",loops=-1) #queue the asteroids music to play after the over 9000 music
+                            gamestate.over_9000_played = True
 
                 # This is where we check for collisions between the ship and asteroids
                 if space_rock.collision(gamestate.ship):
@@ -189,28 +183,12 @@ def main():
                     continue_game = shipdeath.check_ship_death()  # check if the ship is dead
                     if continue_game == True: # ship is dead but has lives left, continue the game
                         gamestate.ship.reset()  # reset the ship
-                    else:
-                        
-                        highscore.update_high_scores(gamestate.score) # update the high scores
-                        gamestate.high_scores = highscore.load_high_scores()
-                        gamestate.high_scores = gamestate.high_scores[:10]  # Limit to top 10 scores
-                        gamestate.top_player_name, gamestate.top_player_score = highscore.get_top_player() # get the top player score and name (has a set default if the list is empty)
+                    else: # ship is dead and no lives left, end the game
+                        highscore.add_high_scores(gamestate.score) # update the high scores
                         print("Game Over!")
                         print(f"Game Score: {gamestate.score}")
                         print(f"Current High Score: {gamestate.top_player_score} by {gamestate.top_player_name}")
-                        for big_space_rock in constants.UPDATEABLE_GROUP: #reset the asteroids
-                            if isinstance(big_space_rock, asteroids.Asteroid):
-                                big_space_rock.kill()
-                        for asfield in constants.UPDATEABLE_GROUP: #reset the asteroid field
-                            if isinstance(asfield, asteroidfield.AsteroidField):
-                                asfield.kill()
-                        for bullet in constants.UPDATEABLE_GROUP: #reset the asteroid field
-                            if isinstance(bullet, bullets.Shot):
-                                bullet.kill()
-                        gamestate.asteroid_field = None #reset the asteroid field
-                        gamestate.ship.reset()
-                        gamestate.score = 0 #reset the score
-                        gamestate.ship.lives = constants.PLAYER_STARTING_LIVES #reset the ship lives
+                        gamestate.game_reset() #reset the game
                         music.stop_music() #stop the music
                         gamestate.playing = False
                         gamestate.main_menu = True

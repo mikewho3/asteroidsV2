@@ -5,10 +5,12 @@ import pygame
 import constants
 import gamestate
 import music
+import titlescreen
+import sys
 
 
 # This will get the player name for the high score
-def get_player_name(screen, font):
+def get_player_name(screen, font,score):
     name = ""
     input_active = True
     music.stop_music() # Stop the music when the input box is active
@@ -16,7 +18,7 @@ def get_player_name(screen, font):
     while input_active:
         for event in pygame.event.get():
             if event.type == pygame.QUIT: # Exit the game if the window is closed
-                return None
+                sys.exit()
             elif event.type == pygame.KEYDOWN: # Check for key presses
                 if event.key == pygame.K_RETURN: # Check for the enter key
                     if len(name) < 1:
@@ -31,10 +33,24 @@ def get_player_name(screen, font):
         
         # Draw input box and text
         screen.fill((0, 0, 0)) # Clear the screen
-        text_surface = font.render("Top Ten High Score! Enter your name:", True, constants.HIGH_SCORE_COLOR)
+        text_surface2 = None # Initialize text_surface2 to None
+        if score > 9000:
+            text_surface = font.render(f"Your Score.... ITS OVER 9000!!", True, constants.HIGH_SCORE_COLOR)
+            text_surface2 = font.render(" Enter your name:", True, constants.HIGH_SCORE_COLOR)
+        else:
+            text_surface = font.render("Top Ten High Score! Enter your name:", True, constants.HIGH_SCORE_COLOR)
+        control_surface = font.render("Press -ENTER- to continue", True, constants.HIGH_SCORE_COLOR)
         name_surface = font.render(name, True, (255, 255, 255))
-        screen.blit(text_surface, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(text_surface)//2, constants.SCREEN_HEIGHT//2 - 50))
-        screen.blit(name_surface, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(name_surface)//2, constants.SCREEN_HEIGHT//2))
+        if text_surface2 is not None:
+            screen.blit(text_surface, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(text_surface)//2, constants.SCREEN_HEIGHT//2 - 50 - (font.get_linesize() * 3)))
+            screen.blit(text_surface2, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(text_surface2)//2, constants.SCREEN_HEIGHT//2 - 50 - (font.get_linesize() * 2)))
+            screen.blit(control_surface, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(control_surface)//2, constants.SCREEN_HEIGHT//2 - 50 - font.get_linesize()))
+            screen.blit(name_surface, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(name_surface)//2, constants.SCREEN_HEIGHT//2 - 50 + font.get_linesize()))
+        else:
+            screen.blit(text_surface, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(text_surface)//2, constants.SCREEN_HEIGHT//2 - 50 - (font.get_linesize() * 2)))
+            screen.blit(control_surface, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(control_surface)//2, constants.SCREEN_HEIGHT//2 - 50 - font.get_linesize()))
+            screen.blit(name_surface, (constants.SCREEN_WIDTH//2 - pygame.Surface.get_width(name_surface)//2, constants.SCREEN_HEIGHT//2 - 50 + font.get_linesize()))
+
         pygame.display.flip()
     music.stop_music() # Stop the high score music
         
@@ -65,6 +81,7 @@ def load_high_scores():
                     high_scores.append((name, int(score)))
         # Sort high scores by score (highest first)
         high_scores.sort(key=lambda x: x[1], reverse=True)
+        high_scores = high_scores[:10]  # Limit to top 10 scores
     except Exception as e:
         # Handle other potential errors
         print(f"Error loading high scores: {e}")
@@ -81,26 +98,31 @@ def get_top_player():
         return "No One Yet...", 0  # Default values if no high scores exist
 
 def display_high_scores(screen, font):
-    #high_scores = load_high_scores()
-    y_position = 100
+    load_high_scores()  # Ensure high scores are updated before displaying
+    titlescreen.draw_title_line()  # Draw the title line
+    titlescreen.draw_text_line1()  # Draw the first text line
+    y_position = 300
     
     # Title
     title = constants.header_score_font.render("HIGH SCORES", True, constants.HIGH_SCORE_COLOR)
-    screen.blit(title, (100, 0))
+    screen.blit(title, (100, 200))
     
     # List of scores
     for i, (name, score) in enumerate(gamestate.high_scores[:10]):  # Display top 10
-        text = font.render(f"{i+1}. Name: {name} | Score: {score}", True, constants.HIGH_SCORE_COLOR)
+        if score > 9000:
+            text = font.render(f"{i+1}. Name: {name} | Score: {score}  >>> ITS OVER 9,000!!!!! <<<", True, constants.GAMEOVER_COLOR)
+        else:
+            text = font.render(f"{i+1}. Name: {name} | Score: {score}", True, constants.HIGH_SCORE_COLOR)
         screen.blit(text, (100, y_position))
         y_position += 30  # Move down for next score
     
     # Instructions to continue
-    if y_position > 100:  # If any scores were displayed
+    if y_position > 300:  # If any scores were displayed
         continue_text = font.render("Press any key to continue", True, constants.HIGH_SCORE_COLOR)
         screen.blit(continue_text, (constants.SCREEN_WIDTH//2 - continue_text.get_width()//2, y_position + 30))
 
 
-def update_high_scores(new_score):
+def add_high_scores(new_score):
     # Load existing high scores
     high_scores = load_high_scores()
     
@@ -113,7 +135,7 @@ def update_high_scores(new_score):
     # Check if the new score matches or beats any existing scores
     for i, (name, score) in enumerate(high_scores):
         if new_score >= score and not score_added:
-            player_name = get_player_name(gamestate.screen, constants.big_font)
+            player_name = get_player_name(gamestate.screen, constants.big_font,new_score)
             # Add the new score here (replacing the equal score or inserting before lower score)
             updated_scores.append((player_name, new_score))
             score_added = True
@@ -140,5 +162,16 @@ def update_high_scores(new_score):
     with open("high_scores.txt", "w") as file:  # Note: "w" mode overwrites the file
         for name, score in updated_scores:
             file.write(f"{name},{score}\n")
-    
+    update_high_scores()  # Update the gamestate with new high scores
     return
+
+
+def update_high_scores():
+    # Load high scores from the file
+    gamestate.high_scores = load_high_scores()
+    
+    # Limit to top 10 scores (shouldn't be necessary, but just in case)
+    gamestate.high_scores = gamestate.high_scores[:10]
+    
+    # Get the top player name and score
+    gamestate.top_player_name, gamestate.top_player_score = get_top_player()  # get the top player score and name

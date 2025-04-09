@@ -2,6 +2,10 @@
 
 # Import required modules
 import pygame
+import constants
+import asteroids
+import asteroidfield
+import bullets
 
 # Is the game active and the player is playing?
 running = True # This variable is used to control the main game loop and all other game loops
@@ -31,6 +35,9 @@ top_player_score = None # This will be the score of the player with the highest 
 
 # Game Score
 score = 0
+over_9000_played = False # This variable is used to control the over 9000 sound effect
+over_9000_playing = False # This variable is used to detect if the sound effect is currently playing
+over_9000_time_started = 0 # This variable is used to store the time the sound effect started playing
 
 # Game Difficulty Variable
 difficulty = 1
@@ -53,3 +60,19 @@ key_lock_1 = 0
 key_lock_2 = 0
 key_lock_5 = 0
 key_lock_spacebar = 0
+
+
+def game_reset():
+    for big_space_rock in constants.UPDATEABLE_GROUP: #reset the asteroids
+        if isinstance(big_space_rock, asteroids.Asteroid):
+            big_space_rock.kill()
+        for asfield in constants.UPDATEABLE_GROUP: #reset the asteroid field
+            if isinstance(asfield, asteroidfield.AsteroidField):
+                asfield.kill()
+        for bullet in constants.UPDATEABLE_GROUP: #reset the asteroid field
+            if isinstance(bullet, bullets.Shot):
+                bullet.kill()
+    asteroid_field = None #reset the asteroid field
+    ship.reset()
+    score = 0 #reset the score
+    ship.lives = constants.PLAYER_STARTING_LIVES #reset the ship lives
